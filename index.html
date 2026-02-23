@@ -18,19 +18,25 @@
         </header>
 
         <div class="main-content">
-            <aside class="sidebar">
-                <h2>エピソード一覧</h2>
-                <nav id="episode-list" class="episode-list">
+            <aside class="sidebar" aria-label="サイドバー">
+                <div class="special-links">
+                    <a href="#" class="special-link" data-page="characters">📖 登場人物紹介</a>
+                    <a href="#" class="special-link" data-page="doctrine">📜 おふとん教の教義</a>
+                    <a href="#" class="special-link warning" data-page="settings">⚠️ 設定資料集</a>
+                </div>
+                <h2 id="episode-list-heading">エピソード一覧</h2>
+                <nav id="episode-list" class="episode-list" aria-labelledby="episode-list-heading">
                     <!-- エピソードリストがJavaScriptで生成されます -->
                 </nav>
             </aside>
 
-            <main class="content">
+            <main class="content" role="main">
                 <div id="story-content" class="story-content">
                     <div class="welcome">
                         <h2>ようこそ、おふとん物語へ</h2>
                         <p>左のメニューからエピソードを選んでください。</p>
                         <p>全24話の心温まる物語をお楽しみください。</p>
+                        <p>2/10はおふとん記念日です。</p>
                     </div>
                 </div>
             </main>

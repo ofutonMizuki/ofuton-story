@@ -26,6 +26,18 @@ const episodes = [
     { number: 24, file: '第24話.md' }
 ];
 
+// エピソード数（マジックナンバー回避のため episodes から算出）
+const MAX_EPISODES = episodes.length;
+
+// エピソード範囲チェック
+function isValidEpisode(number) {
+    return Number.isInteger(number) && number >= 1 && number <= MAX_EPISODES;
+}
+
+// エピソードとページの簡易キャッシュ
+const episodeCache = new Map();
+const pageCache = new Map();
+
 // DOMが読み込まれたら実行
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -34,17 +46,62 @@ document.addEventListener('DOMContentLoaded', () => {
 // アプリケーションの初期化
 function initializeApp() {
     renderEpisodeList();
-    
-    // URLパラメータからエピソードを読み込む
+    setupSpecialLinks();
+    handleRoute();
+}
+
+// URLパラメータに応じてコンテンツを切り替える
+function handleRoute() {
     const urlParams = new URLSearchParams(window.location.search);
     const episodeParam = urlParams.get('episode');
-    
+    const pageParam = urlParams.get('page');
+
+    if (pageParam === 'characters') {
+        loadCharactersPage();
+        return;
+    }
+
+    // "backstory" は settings_integrated.md の別名として扱う
+    if (pageParam === 'settings' || pageParam === 'backstory') {
+        loadSettingsPage();
+        return;
+    }
+
+    if (pageParam === 'doctrine') {
+        loadDoctrinePage();
+        return;
+    }
+
     if (episodeParam) {
-        const episodeNumber = parseInt(episodeParam);
-        if (episodeNumber >= 1 && episodeNumber <= 24) {
+        const episodeNumber = parseInt(episodeParam, 10);
+        if (isValidEpisode(episodeNumber)) {
             loadEpisode(episodeNumber);
+            return;
         }
     }
+}
+
+// 特別リンクのセットアップ
+function setupSpecialLinks() {
+    document.querySelectorAll('.special-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = link.dataset.page;
+            if (page === 'characters') {
+                loadCharactersPage();
+                updateURLForPage('characters');
+            } else if (page === 'settings') {
+                loadSettingsPage();
+                updateURLForPage('settings');
+            } else if (page === 'backstory') {
+                loadSettingsPage();
+                updateURLForPage('settings');
+            } else if (page === 'doctrine') {
+                loadDoctrinePage();
+                updateURLForPage('doctrine');
+            }
+        });
+    });
 }
 
 // エピソードリストの描画
@@ -76,47 +133,55 @@ function renderEpisodeList() {
 async function loadEpisode(episodeNumber) {
     const episode = episodes.find(ep => ep.number === episodeNumber);
     if (!episode) return;
-    
+
     const contentDiv = document.getElementById('story-content');
-    
+
     // ローディング表示
     contentDiv.innerHTML = '<div class="loading">読み込み中...</div>';
-    
+
     try {
-        const response = await fetch(episode.file);
-        
-        if (!response.ok) {
-            throw new Error('ファイルの読み込みに失敗しました');
+        let markdown;
+
+        // キャッシュがあればそれを利用
+        if (episodeCache.has(episode.file)) {
+            markdown = episodeCache.get(episode.file);
+        } else {
+            const response = await fetch(episode.file);
+
+            if (!response.ok) {
+                throw new Error('ファイルの読み込みに失敗しました');
+            }
+
+            markdown = await response.text();
+            episodeCache.set(episode.file, markdown);
         }
-        
-        const markdown = await response.text();
-        
+
         // MarkdownをHTMLに変換
         const html = marked.parse(markdown);
-        
+
         // ナビゲーションボタンを生成
         const navigation = createNavigation(episodeNumber);
-        
+
         // コンテンツを表示（アニメーション効果のため一度消してから表示）
         contentDiv.style.opacity = '0';
         setTimeout(() => {
             contentDiv.innerHTML = html + navigation;
             contentDiv.style.opacity = '1';
-            
+
             // ページトップにスクロール
             const contentArea = document.querySelector('.content');
             if (contentArea) {
                 contentArea.scrollTop = 0;
             }
             window.scrollTo(0, 0);
-            
+
             // ナビゲーションボタンのイベントリスナーを設定
             setupNavigationListeners();
         }, 150);
-        
+
         // アクティブなエピソードをハイライト
         updateActiveEpisode(episodeNumber);
-        
+
     } catch (error) {
         console.error('Error loading episode:', error);
         contentDiv.innerHTML = `
@@ -129,47 +194,143 @@ async function loadEpisode(episodeNumber) {
     }
 }
 
-// アクティブなエピソードの更新
-function updateActiveEpisode(episodeNumber) {
-    // すべてのエピソードリンクからactiveクラスを削除
-    document.querySelectorAll('.episode-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // 選択されたエピソードにactiveクラスを追加
-    const activeLink = document.querySelector(`[data-episode="${episodeNumber}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-        
-        // サイドバーをスクロールして選択されたエピソードを表示
-        activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-}
-
 // URLの更新（ブラウザの履歴に追加）
 function updateURL(episodeNumber) {
     const url = new URL(window.location);
+    url.searchParams.delete('page');
     url.searchParams.set('episode', episodeNumber);
     window.history.pushState({}, '', url);
 }
 
+// 特別ページ用のURL更新
+function updateURLForPage(pageName) {
+    const url = new URL(window.location);
+    url.searchParams.delete('episode');
+    url.searchParams.set('page', pageName);
+    window.history.pushState({}, '', url);
+}
+
+// アクティブなエピソードリンクを更新
+function updateActiveEpisode(currentEpisode) {
+    document.querySelectorAll('.episode-link').forEach(link => {
+        const ep = parseInt(link.dataset.episode);
+        if (ep === currentEpisode) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+// 登場人物ページの読み込み
+async function loadCharactersPage() {
+    const contentDiv = document.getElementById('story-content');
+
+    // ローディング表示
+    contentDiv.innerHTML = '<div class="loading">読み込み中...</div>';
+
+    try {
+        // Markdownファイルを読み込み
+        const response = await fetch('characters.md');
+
+        if (!response.ok) {
+            throw new Error('ファイルの読み込みに失敗しました');
+        }
+
+        const markdown = await response.text();
+        const html = marked.parse(markdown);
+
+        // コンテンツを表示
+        contentDiv.style.opacity = '0';
+        setTimeout(() => {
+            contentDiv.innerHTML = html;
+            contentDiv.style.opacity = '1';
+
+            // ページトップにスクロール
+            const contentArea = document.querySelector('.content');
+            if (contentArea) {
+                contentArea.scrollTop = 0;
+            }
+            window.scrollTo(0, 0);
+        }, 150);
+
+        // アクティブなエピソードをクリア
+        document.querySelectorAll('.episode-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+    } catch (error) {
+        console.error('Error loading characters page:', error);
+        contentDiv.innerHTML = `
+            <div class="error">
+                <h2>エラー</h2>
+                <p>登場人物ページの読み込みに失敗しました。</p>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// 設定資料集ページの読み込み
+async function loadSettingsPage() {
+    const contentDiv = document.getElementById('story-content');
+    
+    // ローディング表示
+    contentDiv.innerHTML = '<div class="loading">読み込み中...</div>';
+    
+    try {
+        // Markdownファイルを読み込み
+        const response = await fetch('settings_integrated.md');
+        
+        if (!response.ok) {
+            throw new Error('ファイルの読み込みに失敗しました');
+        }
+        
+        const markdown = await response.text();
+        const html = marked.parse(markdown);
+        
+        // コンテンツを表示
+        contentDiv.style.opacity = '0';
+        setTimeout(() => {
+            contentDiv.innerHTML = html;
+            contentDiv.style.opacity = '1';
+            
+            // ページトップにスクロール
+            const contentArea = document.querySelector('.content');
+            if (contentArea) {
+                contentArea.scrollTop = 0;
+            }
+            window.scrollTo(0, 0);
+        }, 150);
+        
+        // アクティブなエピソードをクリア
+        document.querySelectorAll('.episode-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+    } catch (error) {
+        console.error('Error loading settings page:', error);
+        contentDiv.innerHTML = `
+            <div class="error">
+                <h2>エラー</h2>
+                <p>設定資料集の読み込みに失敗しました。</p>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+
+
 // ブラウザの戻る/進むボタンへの対応
 window.addEventListener('popstate', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const episodeParam = urlParams.get('episode');
-    
-    if (episodeParam) {
-        const episodeNumber = parseInt(episodeParam);
-        if (episodeNumber >= 1 && episodeNumber <= 24) {
-            loadEpisode(episodeNumber);
-        }
-    }
+    handleRoute();
 });
 
 // ナビゲーションボタンの生成
 function createNavigation(currentEpisode) {
     const hasPrev = currentEpisode > 1;
-    const hasNext = currentEpisode < 24;
+    const hasNext = currentEpisode < MAX_EPISODES;
     
     const prevButton = hasPrev 
         ? `<a href="#" class="nav-button prev" data-episode="${currentEpisode - 1}">前の話</a>`
@@ -212,8 +373,76 @@ document.addEventListener('keydown', (e) => {
     }
     
     // 右矢印キー: 次のエピソード
-    if (e.key === 'ArrowRight' && currentEpisode < 24) {
+    if (e.key === 'ArrowRight' && currentEpisode < MAX_EPISODES) {
         loadEpisode(currentEpisode + 1);
         updateURL(currentEpisode + 1);
     }
 });
+
+// 汎用 Markdown ページ読み込み
+async function loadMarkdownPage(path) {
+    const contentDiv = document.getElementById('story-content');
+
+    // ローディング表示
+    contentDiv.innerHTML = '<div class="loading">読み込み中...</div>';
+
+    try {
+        let markdown;
+
+        if (pageCache.has(path)) {
+            markdown = pageCache.get(path);
+        } else {
+            const response = await fetch(path);
+
+            if (!response.ok) {
+                throw new Error('ファイルの読み込みに失敗しました');
+            }
+
+            markdown = await response.text();
+            pageCache.set(path, markdown);
+        }
+
+        const html = marked.parse(markdown);
+
+        contentDiv.style.opacity = '0';
+        setTimeout(() => {
+            contentDiv.innerHTML = html;
+            contentDiv.style.opacity = '1';
+
+            const contentArea = document.querySelector('.content');
+            if (contentArea) {
+                contentArea.scrollTop = 0;
+            }
+            window.scrollTo(0, 0);
+        }, 150);
+
+        // アクティブなエピソードをクリア
+        document.querySelectorAll('.episode-link').forEach(link => {
+            link.classList.remove('active');
+        });
+    } catch (error) {
+        console.error('Error loading markdown page:', error);
+        contentDiv.innerHTML = `
+            <div class="error">
+                <h2>エラー</h2>
+                <p>ページの読み込みに失敗しました。</p>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// 登場人物ページの読み込み
+async function loadCharactersPage() {
+    await loadMarkdownPage('characters.md');
+}
+
+// 設定資料集ページの読み込み
+async function loadSettingsPage() {
+    await loadMarkdownPage('settings_integrated.md');
+}
+
+// おふとん教の教義ページの読み込み
+async function loadDoctrinePage() {
+    await loadMarkdownPage('ofuton_doctrine.md');
+}
