@@ -29,6 +29,9 @@ const episodes = [
 // エピソード数（マジックナンバー回避のため episodes から算出）
 const MAX_EPISODES = episodes.length;
 
+// Markdown パーサ（markdown-it）
+const md = window.markdownit();
+
 // エピソード範囲チェック
 function isValidEpisode(number) {
     return Number.isInteger(number) && number >= 1 && number <= MAX_EPISODES;
@@ -157,7 +160,7 @@ async function loadEpisode(episodeNumber) {
         }
 
         // MarkdownをHTMLに変換
-        const html = marked.parse(markdown);
+        const html = md.render(markdown);
 
         // ナビゲーションボタンを生成
         const navigation = createNavigation(episodeNumber);
@@ -238,7 +241,7 @@ async function loadCharactersPage() {
         }
 
         const markdown = await response.text();
-        const html = marked.parse(markdown);
+        const html = md.render(markdown);
 
         // コンテンツを表示
         contentDiv.style.opacity = '0';
@@ -287,7 +290,7 @@ async function loadSettingsPage() {
         }
         
         const markdown = await response.text();
-        const html = marked.parse(markdown);
+        const html = md.render(markdown);
         
         // コンテンツを表示
         contentDiv.style.opacity = '0';
@@ -402,7 +405,7 @@ async function loadMarkdownPage(path) {
             pageCache.set(path, markdown);
         }
 
-        const html = marked.parse(markdown);
+        const html = md.render(markdown);
 
         contentDiv.style.opacity = '0';
         setTimeout(() => {
