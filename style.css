@@ -1,0 +1,483 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', sans-serif;
+    line-height: 1.8;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 300px;
+    background: #f8f9fa;
+    border-right: 2px solid #e9ecef;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.sidebar h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #667eea;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.episode-list {
+    list-style: none;
+}
+
+.episode-item {
+    margin-bottom: 0.5rem;
+}
+
+.episode-link {
+    display: block;
+    padding: 0.8rem 1rem;
+    text-decoration: none;
+    color: #495057;
+    background: white;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.episode-link:hover {
+    background: #e9ecef;
+    border-color: #667eea;
+    transform: translateX(5px);
+}
+
+.episode-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 3rem;
+}
+
+.story-content {
+    max-width: 900px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcome {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.welcome h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #667eea;
+}
+
+.welcome p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.story-content h1 {
+    font-size: 2.2rem;
+    color: #667eea;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #667eea;
+}
+
+.story-content h2 {
+    font-size: 1.6rem;
+    color: #764ba2;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    border-left: 5px solid #764ba2;
+}
+
+.story-content p {
+    margin-bottom: 1.3rem;
+    text-indent: 1em;
+    text-align: justify;
+}
+
+.story-content strong {
+    color: #667eea;
+    font-weight: bold;
+}
+
+.story-content em {
+    color: #764ba2;
+    font-style: italic;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+    font-size: 1.2rem;
+}
+
+.error {
+    text-align: center;
+    padding: 3rem;
+    color: #dc3545;
+    font-size: 1.2rem;
+}
+
+footer {
+    background: #f8f9fa;
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 2px solid #e9ecef;
+    color: #6c757d;
+}
+
+/* スクロールバーのカスタマイズ */
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.content::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
+/* レスポンシブデザイン */
+
+/* タブレット (1024px以下) */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 250px;
+    }
+
+    .content {
+        padding: 2rem;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .story-content h1 {
+        font-size: 1.9rem;
+    }
+
+    .story-content h2 {
+        font-size: 1.4rem;
+    }
+}
+
+/* モバイル (768px以下) */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-height: 250px;
+        border-right: none;
+        border-bottom: 2px solid #e9ecef;
+        padding: 1rem;
+    }
+
+    .sidebar h2 {
+        font-size: 1.1rem;
+    }
+
+    .episode-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .episode-link {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .episode-link:hover {
+        transform: none;
+    }
+
+    .content {
+        padding: 1.5rem 1rem;
+    }
+
+    header {
+        padding: 1.5rem 1rem;
+    }
+
+    header h1 {
+        font-size: 1.6rem;
+    }
+
+    .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .story-content h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .story-content h2 {
+        font-size: 1.2rem;
+        margin-top: 2rem;
+        padding-left: 0.7rem;
+    }
+
+    .story-content p {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .page-navigation {
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+    }
+
+    .nav-button {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .nav-spacer {
+        display: none;
+    }
+
+    .welcome {
+        padding: 2rem 1rem;
+    }
+
+    .welcome h2 {
+        font-size: 1.5rem;
+    }
+
+    .welcome p {
+        font-size: 1rem;
+    }
+
+    footer {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* 小型モバイル (480px以下) */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+    }
+
+    .sidebar {
+        max-height: 200px;
+        padding: 0.8rem;
+    }
+
+    .episode-list {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.4rem;
+    }
+
+    .episode-link {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .content {
+        padding: 1rem 0.8rem;
+    }
+
+    .story-content h1 {
+        font-size: 1.3rem;
+    }
+
+    .story-content h2 {
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+    }
+
+    .story-content p {
+        font-size: 0.95rem;
+        text-indent: 0.8em;
+    }
+
+    .nav-button {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 20px;
+    }
+
+    .nav-button.prev::before,
+    .nav-button.next::after {
+        font-size: 1rem;
+    }
+
+    .page-navigation {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+    }
+}
+
+/* ページナビゲーション */
+.page-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e9ecef;
+    gap: 1rem;
+}
+
+.nav-button {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+}
+
+.nav-button:active {
+    transform: translateY(0);
+}
+
+.nav-button.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.nav-button.prev::before {
+    content: '←';
+    font-size: 1.2rem;
+}
+
+.nav-button.next::after {
+    content: '→';
+    font-size: 1.2rem;
+}
+
+.nav-spacer {
+    flex: 1;
+}
+
+/* 印刷用スタイル */
+@media print {
+    body {
+        background: white;
+    }
+
+    .sidebar,
+    .page-navigation,
+    footer {
+        display: none;
+    }
+
+    .container {
+        box-shadow: none;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .story-content h1,
+    .story-content h2 {
+        page-break-after: avoid;
+    }
+
+    .story-content p {
+        page-break-inside: avoid;
+    }
+}
